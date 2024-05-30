@@ -1,3 +1,75 @@
+
+
+```javascript
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const app = express();
+
+// Middleware
+app.use(bodyParser.json());
+
+// MongoDB connection
+mongoose.connect('mongodb://localhost/jobapp', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
+
+// Job schema and model
+const jobSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  company: String,
+  location: String,
+  datePosted: { type: Date, default: Date.now }
+});
+
+const Job = mongoose.model('Job', jobSchema);
+
+// Routes
+app.get('/jobs', async (req, res) => {
+  try {
+    const jobs = await Job.find();
+    res.json(jobs);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.post('/jobs', async (req, res) => {
+  const newJob = new Job(req.body);
+  try {
+    const job = await newJob.save();
+    res.status(201).json(job);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+});
+
+// Server listening
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+
+### Brief Description:
+
+1. **Setup and Middleware:**
+   - The code sets up an Express application and uses `bodyParser.json()` middleware to parse incoming JSON requests.
+
+2. **MongoDB Connection:**
+   - It connects to a MongoDB database named `jobapp` hosted locally. Upon a successful connection, it logs a confirmation message. If the connection fails, it logs the error.
+
+3. **Job Schema and Model:**
+   - Defines a Mongoose schema for a `Job` object with fields: `title`, `description`, `company`, `location`, and `datePosted`.
+   - Creates a Mongoose model `Job` based on the schema, enabling interaction with the jobs collection in the MongoDB database.
+
+4. **Routes:**
+   - `GET /jobs`: Fetches all job entries from the database and returns them as a JSON response. If an error occurs, it sends a 500 status with the error.
+   - `POST /jobs`: Creates a new job entry using the data provided in the request body. It saves the new job to the database and returns the created job as a JSON response with a 201 status. If an error occurs, it sends a 400 status with the error.
+
+5. **Server Listening:**
+   - The server listens on port 5000 (or a port specified in the environment variables). It logs a message indicating the server is running and the port it's listening on.
+
+
 Experience in Building a Job Application with the MERN Stack
 Understanding Requirements
 The first step involves understanding the project requirements. This includes collaborating with stakeholders to define the features and functionalities of the job application platform. Essential features might include user authentication, job listings, application submission, and profile management.
